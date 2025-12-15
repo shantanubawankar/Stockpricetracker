@@ -57,7 +57,9 @@ async function loadWatchlist() {
 function connectStream() {
   try {
     sse = new EventSource(`${API_BASE}/api/stream`);
-    document.getElementById('streamStatus').textContent = 'Connected';
+    const status = document.getElementById('streamStatus');
+    status.textContent = 'Connected';
+    status.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200';
     sse.addEventListener('quote', (ev) => {
       const q = JSON.parse(ev.data);
       const priceEl = document.getElementById(`price-${q.symbol}`);
@@ -76,10 +78,14 @@ function connectStream() {
       document.getElementById('alertsList').prepend(li);
     });
     sse.onerror = () => {
-      document.getElementById('streamStatus').textContent = 'Disconnected';
+      const status2 = document.getElementById('streamStatus');
+      status2.textContent = 'Disconnected';
+      status2.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
     };
   } catch (e) {
-    document.getElementById('streamStatus').textContent = 'Disconnected';
+    const status3 = document.getElementById('streamStatus');
+    status3.textContent = 'Disconnected';
+    status3.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
   }
 }
 
@@ -90,6 +96,9 @@ function wireSearch() {
   btn.addEventListener('click', async () => {
     const q = input.value.trim();
     if (!q) return;
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = 'Searching…';
     const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}`);
     const data = await res.json();
     ul.innerHTML = '';
@@ -124,11 +133,15 @@ function wireSearch() {
         b.addEventListener('click', () => loadCharts(symbol));
       }
     });
+    btn.disabled = false;
+    btn.textContent = origText;
   });
 }
 
 async function loadCharts(symbol) {
   const interval = document.getElementById('intervalSelect').value;
+  const overlay = document.getElementById('chartLoading');
+  if (overlay) overlay.classList.remove('hidden');
   const res = await fetch(`${API_BASE}/api/historic?symbol=${encodeURIComponent(symbol)}&interval=${interval}`);
   const data = await res.json();
   const labels = data.points.map((p) => p.t);
@@ -188,6 +201,7 @@ async function loadCharts(symbol) {
       },
     },
   });
+  if (overlay) overlay.classList.add('hidden');
 }
 
 function wireAlerts() {
