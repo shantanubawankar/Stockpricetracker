@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "https://stockpricetracker.onrender.com/$1",
+      "destination": "https://stockpricetracker-nq3m.onrender.com/$1",
       "statusCode": 308
     }
   ]
